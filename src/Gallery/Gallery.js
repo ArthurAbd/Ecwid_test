@@ -1,28 +1,25 @@
 import React from 'react';
 import s from './Gallery.module.sass'
 
-function Gallery({photos}) {
+function Gallery({photos, setPhotos}) {
     
     const myRef = React.createRef()
-    const [galleryWidth, setGalleryWidth] = React.useState({})
+    const [galleryWidth, setGalleryWidth] = React.useState(null)
     const [, forceUpdate] = React.useState()
-    
-    // const handleImageLoaded = (img) => {
-        //     setWidth(img.target.naturalWidth)
-        // }
         
     window.onresize = () => forceUpdate([])
     
     React.useEffect(() => {
         setGalleryWidth(myRef.current.offsetWidth)
-    })
+    }, [myRef])
     
     const photoForRender = () => {
+        if (!galleryWidth) {return []}
         let result = []
         let currentLine = []
         let counter = 0
         const defaultRatio = galleryWidth / 250
-        photos.galleryImages.forEach((img, index) => {
+        photos.forEach((img, index) => {
             counter += img.width / img.height
             currentLine[index] = {
                 ratio: img.width / img.height,
@@ -40,8 +37,7 @@ function Gallery({photos}) {
                 counter = 0
             }
 
-            if (index + 1 === photos.galleryImages.length) {
-                console.log(index + 1)
+            if (index + 1 === photos.length) {
                 currentLine.forEach(({ratio, url}) => {
                     result.push({
                         width: galleryWidth * ratio / defaultRatio,
@@ -52,14 +48,24 @@ function Gallery({photos}) {
         })
         return result
     }
+
+    const onLoadHandler = (e, url, index) => {
+        const photoData = {url, width: e.target.naturalWidth, height: e.target.naturalHeight}
+        const newPhotos = [...photos]
+        newPhotos[index] = photoData
+        setPhotos([...newPhotos])
+    }
+
     return (
         <div className={s.Gallery} ref={myRef}>
             {photoForRender().map((img, index) => {
                 return (
                     <img
+                        alt=''
                         key={index}
                         src={img.url}
-                        style={{width: img.width}}
+                        style={{width: img.width ? img.width : 0}}
+                        onLoad={!img.width ? e => onLoadHandler(e, img.url, index) : null}
                     />
                 )
             })} 

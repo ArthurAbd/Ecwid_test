@@ -1,12 +1,14 @@
 import React from 'react';
 import s from './Input.module.sass'
 
-function Input() {
+function Input({loadingPhotos}) {
   
   return (
     <div className={s.Input}>
-        <input type='text' />
-        <button>Загрузить</button>
+      <form onSubmit={loadingPhotos} >
+        <input type='text' name='url' />
+        <button type='submit'>Загрузить</button>
+      </form>
     </div>
   )
 }
